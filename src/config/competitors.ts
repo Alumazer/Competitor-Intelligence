@@ -14,9 +14,9 @@ export const competitors: CompetitorConfig[] = [
   {
     id: 'wise',
     displayName: 'Wise',
-    // "Wise" is a common word — require a brand anchor ("Wise.com", "TransferWise", or "Wise platform")
-    // OR require both "Wise" + fintech context + signal keyword to reduce noise
-    newsQuery: '("Wise.com" OR "TransferWise" OR "Wise payments" OR "Wise platform" OR "Wise fintech" OR "Kristo Kaarmann") AND (funding OR revenue OR product OR launch OR license OR acquisition OR pricing OR regulation OR partnership OR "cross-border" OR "money transfer")',
+    // "Wise" is a common word. Require "Wise" + a payments/fintech context term to block
+    // "moneywise", "streetwise" etc., while still catching articles like "Wise transactions grow 26%"
+    newsQuery: '"Wise" AND ("cross-border" OR "money transfer" OR "remittance" OR "fintech" OR "payments" OR "TransferWise" OR "Wise.com" OR "foreign exchange" OR "currency" OR "IPO" OR "listing" OR "banking") AND (funding OR revenue OR growth OR product OR launch OR license OR acquisition OR pricing OR regulation OR partnership OR transactions)',
     blogRssUrl: 'https://wise.com/us/blog/feed',
     pressRssUrl: 'https://wise.com/gb/press/feed',
     pricingUrl: 'https://wise.com/us/pricing/send-money',
