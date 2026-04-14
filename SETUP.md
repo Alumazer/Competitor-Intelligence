@@ -39,8 +39,8 @@ Click your project → **Variables** → add each one:
 
 | Key | Value |
 |---|---|
-| `NEWS_API_KEY` | eb44a139ed6542b9b97336f43a7b6ce1 |
-| `RESEND_API_KEY` | re_FBCsQbHE_7LYBHVQ28cD1ZpwU44HhnxGJ |
+| `NEWS_API_KEY` | *(your NewsAPI key)* |
+| `RESEND_API_KEY` | *(your Resend API key)* |
 | `REPORT_FROM_EMAIL` | onboarding@resend.dev |
 | `REPORT_TO_EMAIL` | alumaze@payoneer.com |
 | `PORT` | 3000 |
