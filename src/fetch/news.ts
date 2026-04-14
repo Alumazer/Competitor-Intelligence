@@ -37,7 +37,7 @@ interface NewsApiResponse {
 export async function fetchNews(
   competitor: CompetitorConfig,
   forceRefresh = false,
-  lookbackDays = 7
+  lookbackDays = 1
 ): Promise<IntelItem[]> {
   if (!forceRefresh && !isCacheStale(competitor.id, 'news')) {
     return getItems(competitor.id);

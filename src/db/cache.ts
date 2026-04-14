@@ -122,11 +122,18 @@ export function savePricingSnapshot(snapshot: PricingSnapshot): void {
   `).run(snapshot);
 }
 
+// Clears only the fetch log — forces a re-fetch next run but preserves stored intel items.
+// Use resetAll() if you truly want to wipe everything.
 export function clearCache(competitorId?: string): void {
   if (competitorId) {
-    db.prepare('DELETE FROM intel_items WHERE competitor_id = ?').run(competitorId);
     db.prepare('DELETE FROM fetch_log WHERE competitor_id = ?').run(competitorId);
   } else {
-    db.exec('DELETE FROM intel_items; DELETE FROM fetch_log;');
+    db.exec('DELETE FROM fetch_log;');
   }
+}
+
+// Full wipe — removes all stored items AND the fetch log.
+// Only use this if you want to start completely from scratch.
+export function resetAll(): void {
+  db.exec('DELETE FROM intel_items; DELETE FROM fetch_log;');
 }
