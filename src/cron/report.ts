@@ -43,23 +43,9 @@ export async function runDailyReport(forceRefresh = true): Promise<IntelItem[]> 
       console.warn(`  ✗ ${msg}`);
     }
 
-    // Pricing diff
-    if (competitor.pricingUrl) {
-      try {
-        const diff = await checkPricingPage(competitor);
-        if (diff) {
-          const item = pricingDiffToIntelItem(diff, competitor.displayName);
-          allItems.push(item);
-          console.log(`  ✓ pricing: CHANGED`);
-        } else {
-          console.log(`  ✓ pricing: no change`);
-        }
-      } catch (e) {
-        const msg = `${competitor.id} pricing: ${String(e)}`;
-        errors.push(msg);
-        console.warn(`  ✗ ${msg}`);
-      }
-    }
+    // Pricing diff — disabled: dynamic page elements (cookie banners, bot detection)
+    // cause false positives on every fetch. Pricing signals are captured via
+    // NewsAPI and RSS feeds when companies announce fee changes publicly.
   }
 
   // Deduplicate by id
