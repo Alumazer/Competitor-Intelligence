@@ -1,0 +1,16 @@
+# Environment — never commit secrets
+.env
+
+# Build output
+dist/
+
+# Dependencies
+node_modules/
+
+# Database — local cache only
+data/*.db
+data/*.db-shm
+data/*.db-wal
+
+# OS
+.DS_Store
