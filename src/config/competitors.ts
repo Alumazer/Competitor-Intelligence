@@ -128,18 +128,65 @@ export const competitors: CompetitorConfig[] = [
 
   // ─────────────────────────────────────────────────────────────────────────────
   // INDUSTRY SIGNALS
-  // Broad cross-border payments industry tracker. NewsAPI query covers systemic
-  // themes (stablecoins, CBDC, APAC regulation, payment corridors) that Contify
-  // surfaces but that are not competitor-specific. RSS feeds pull from Finextra
-  // and PYMNTS — the primary trade publications Contify draws from.
+  // Thematic trackers derived from Contify newsletter analysis. Rather than
+  // monitoring named companies, these entries track topic-level signals that
+  // Contify surfaces by monitoring trade publications. Each entry pairs a
+  // focused NewsAPI query with RSS feeds from the specialist publications
+  // Contify draws from most heavily.
   // ─────────────────────────────────────────────────────────────────────────────
 
   {
     id: 'cross-border-industry',
     displayName: 'Cross-Border Payments Industry',
-    newsQuery: '("cross-border payments" OR "international payments" OR "global payments" OR "payment corridor" OR "payment infrastructure") AND (stablecoin OR CBDC OR regulation OR licensing OR launch OR acquisition OR funding OR "new product" OR "payment rails") AND (fintech OR payments)',
-    blogRssUrl: 'https://www.finextra.com/rss/headlines.xml',   // Finextra: primary trade publication for payments/fintech
-    pressRssUrl: 'https://www.pymnts.com/feed/',                // PYMNTS: high-volume payments news aggregator
+    // Broad market-level signals: corridor launches, rail consolidation,
+    // infrastructure investments. Finextra and PYMNTS are the two highest-volume
+    // trade publications in the cross-border payments space.
+    newsQuery: '("cross-border payments" OR "international payments" OR "global payments" OR "payment corridor" OR "payment infrastructure") AND (stablecoin OR CBDC OR regulation OR licensing OR launch OR acquisition OR funding OR "payment rails") AND (fintech OR payments)',
+    blogRssUrl: 'https://www.finextra.com/rss/headlines.xml',  // Primary fintech/payments trade publication
+    pressRssUrl: 'https://www.pymnts.com/feed/',               // High-volume payments news aggregator
+  },
+  {
+    id: 'stablecoin-payments',
+    displayName: 'Stablecoin & Digital Currency Payments',
+    // Contify consistently surfaced stablecoin signals: Western Union Stable Card,
+    // Banking Circle stablecoin settlement, Circle/USDC APAC expansion, MoonPay
+    // virtual accounts, USDb and EURAU launches. This tracker covers the intersection
+    // of stablecoins/CBDC with real payments infrastructure and cross-border use cases.
+    newsQuery: '(stablecoin OR "digital currency" OR CBDC OR USDC OR USDT OR "digital dollar") AND (payments OR "cross-border" OR remittance OR settlement OR "money transfer" OR fintech) AND (launch OR product OR regulation OR adoption OR partnership OR infrastructure)',
+    blogRssUrl: 'https://www.theblock.co/rss.xml',                         // The Block: leading crypto/stablecoin news
+    pressRssUrl: 'https://www.coindesk.com/arc/outboundfeeds/rss/',        // CoinDesk: stablecoin and digital currency coverage
+  },
+  {
+    id: 'apac-fintech',
+    displayName: 'APAC Fintech',
+    // Contify heavily covered APAC signals: RBI cancelling Paytm's licence,
+    // Indonesia QRIS expansion to South Korea, DBS getting CIPS custodian approval,
+    // K Bank and Hana Bank overseas expansion, Alipay+ upgrades. APAC is Payoneer's
+    // largest revenue region — this tracker surfaces regulatory and competitive moves
+    // before they appear in Western media.
+    newsQuery: '(Singapore OR "Hong Kong" OR India OR Indonesia OR China OR "Southeast Asia" OR APAC OR "Asia Pacific") AND (fintech OR payments OR "digital payments" OR "mobile payments" OR "payment license" OR "cross-border") AND (regulation OR launch OR funding OR expansion OR licensing OR partnership OR acquisition)',
+    blogRssUrl: 'https://fintechnews.sg/feed/',         // Fintech News Singapore: APAC-focused fintech publication
+  },
+  {
+    id: 'payment-regulation',
+    displayName: 'Payments Regulation',
+    // Contify flagged regulatory actions that directly affect the competitive
+    // landscape: RBI licence cancellations, Africa AI/stablecoin regulation,
+    // QRIS regulatory expansion, new PSP licensing rounds. Regulatory moves
+    // create market openings and closings that are high-signal for Payoneer strategy.
+    newsQuery: '(payments OR fintech OR "money transfer" OR "digital banking" OR PSP) AND (regulation OR "regulatory approval" OR "central bank" OR license OR compliance OR fine OR sanction OR ban OR "payment directive") AND (new OR approved OR denied OR update OR issued OR revoked)',
+    blogRssUrl: 'https://ibsintelligence.com/feed/',      // IBS Intelligence: banking/payments regulatory coverage
+    pressRssUrl: 'https://www.fintechfutures.com/feed/', // Fintech Futures: fintech regulatory and product news
+  },
+  {
+    id: 'payments-infrastructure',
+    displayName: 'Payments Infrastructure',
+    // Contify surfaced infrastructure-level signals: Nium/Ripple partnership for
+    // Philippines-Mexico corridor, UnionPay partnerships, real-time payment rail
+    // launches, and PSP network expansions. These are leading indicators for where
+    // the competitive battleground is moving before it reaches product announcements.
+    newsQuery: '("payment rails" OR "payment corridor" OR "payment network" OR "real-time payments" OR "instant payments" OR RTP OR "open banking" OR "payment infrastructure" OR "payment switch") AND (launch OR expansion OR partnership OR acquisition OR investment OR new OR upgrade)',
+    blogRssUrl: 'https://thepaypers.com/rss',            // The Paypers: specialist cross-border payments publication
   },
 ];
 
