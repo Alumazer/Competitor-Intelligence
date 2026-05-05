@@ -1,18 +1,11 @@
 import { XMLParser } from 'fast-xml-parser';
-import type { CompetitorConfig, IntelItem, SignalType, SourceType } from '../types/index.js';
-import { isCacheStale, saveItems, getItems, makeId } from '../db/cache.js';
+import type { CompetitorConfig, IntelItem, SourceType } from '../types/index.js';
+import { isCacheStale, saveItems, makeId } from '../db/cache.js';
+import { classifySignal } from '../utils/signals.js';
 
 const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_' });
 
-function classifySignal(text: string): SignalType {
-  const t = text.toLowerCase();
-  if (/acqui|merger|acquis|partner|deal/.test(t))                     return 'ma';
-  if (/licen|regulat|fine|penalty|sanction|compliance/.test(t))       return 'regulatory';
-  if (/pric|fee|plan|packag|subscript/.test(t))                       return 'pricing';
-  if (/revenue|funding|raise|valuat|ipo|earning|profit|loss/.test(t)) return 'financial';
-  if (/launch|feature|product|update|release|new|api/.test(t))        return 'product';
-  return 'other';
-}
+// ─── Date helpers ─────────────────────────────────────────────────────────────
 
 function parseDate(raw: string | undefined): string {
   if (!raw) return new Date().toISOString();
@@ -25,7 +18,8 @@ function parseDate(raw: string | undefined): string {
 async function fetchFeed(
   url: string,
   competitorId: string,
-  sourceType: SourceType
+  sourceType: SourceType,
+  lookbackDays = 1
 ): Promise<IntelItem[]> {
   const res = await fetch(url, {
     headers: { 'User-Agent': 'CompetitorIntelBot/2.0 (internal monitoring)' },
@@ -46,29 +40,37 @@ async function fetchFeed(
     ? channel.entry
     : [];
 
-  return rawItems.slice(0, 20).map((entry) => {
-    const title = String(entry.title ?? '');
-    const link =
-      typeof entry.link === 'string'
-        ? entry.link
-        : (entry.link as { '@_href': string })?.['@_href'] ?? String(entry.guid ?? '');
-    const snippet = String(
-      entry.description ?? entry.summary ?? entry.content ?? ''
-    ).replace(/<[^>]+>/g, '').slice(0, 300);
-    const date = parseDate(String(entry.pubDate ?? entry.updated ?? entry.published ?? ''));
+  // Build a cutoff date to match the lookback window used by the NewsAPI fetcher.
+  // Parse up to 50 entries before filtering so we don't discard items just because
+  // the feed puts them after newer content.
+  const cutoff = new Date(Date.now() - lookbackDays * 24 * 60 * 60 * 1000).toISOString();
 
-    return {
-      id: makeId(link),
-      competitorId,
-      type: sourceType,
-      signal: classifySignal(`${title} ${snippet}`),
-      title,
-      date,
-      url: link,
-      snippet,
-      fetchedAt: now,
-    } satisfies IntelItem;
-  });
+  return rawItems
+    .slice(0, 50)
+    .map((entry) => {
+      const title = String(entry.title ?? '');
+      const link =
+        typeof entry.link === 'string'
+          ? entry.link
+          : (entry.link as { '@_href': string })?.['@_href'] ?? String(entry.guid ?? '');
+      const snippet = String(
+        entry.description ?? entry.summary ?? entry.content ?? ''
+      ).replace(/<[^>]+>/g, '').slice(0, 300);
+      const date = parseDate(String(entry.pubDate ?? entry.updated ?? entry.published ?? ''));
+
+      return {
+        id: makeId(link),
+        competitorId,
+        type: sourceType,
+        signal: classifySignal(`${title} ${snippet}`),
+        title,
+        date,
+        url: link,
+        snippet,
+        fetchedAt: now,
+      } satisfies IntelItem;
+    })
+    .filter((item) => item.date >= cutoff); // Only return items within the lookback window
 }
 
 // ─── Public API ───────────────────────────────────────────────────────────────
@@ -89,9 +91,8 @@ export async function fetchRssFeeds(
       } catch (e) {
         console.warn(`[rss] Blog feed failed for ${competitor.id}:`, e);
       }
-    } else {
-      results.push(...getItems(competitor.id));
     }
+    // Cache is fresh: items from this feed were already included in a prior email — skip.
   }
 
   // Press release feed
@@ -104,9 +105,8 @@ export async function fetchRssFeeds(
       } catch (e) {
         console.warn(`[rss] Press feed failed for ${competitor.id}:`, e);
       }
-    } else {
-      results.push(...getItems(competitor.id));
     }
+    // Cache is fresh: skip.
   }
 
   return results;

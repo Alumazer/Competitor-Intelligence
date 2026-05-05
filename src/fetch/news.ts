@@ -1,22 +1,10 @@
 import { createHash } from 'crypto';
-import type { CompetitorConfig, IntelItem, SignalType } from '../types/index.js';
+import type { CompetitorConfig, IntelItem } from '../types/index.js';
 import { isCacheStale, saveItems, getItems, makeId } from '../db/cache.js';
+import { classifySignal } from '../utils/signals.js';
 
 const NEWS_API_KEY = process.env.NEWS_API_KEY!;
 const BASE_URL = 'https://newsapi.org/v2/everything';
-
-// ─── Signal classifier ────────────────────────────────────────────────────────
-// Maps keywords in title/snippet to signal types
-
-function classifySignal(text: string): SignalType {
-  const t = text.toLowerCase();
-  if (/acqui|merger|acquis|partner|deal|joint venture/.test(t))      return 'ma';
-  if (/licen|regulat|fine|penalty|sanction|compliance|authority/.test(t)) return 'regulatory';
-  if (/pric|fee|plan|packag|subscript|cost|charge/.test(t))          return 'pricing';
-  if (/revenue|funding|raise|valuat|ipo|earning|profit|loss|quarter/.test(t)) return 'financial';
-  if (/launch|feature|product|update|release|new|api|integrat/.test(t)) return 'product';
-  return 'other';
-}
 
 // ─── Fetch from NewsAPI ───────────────────────────────────────────────────────
 

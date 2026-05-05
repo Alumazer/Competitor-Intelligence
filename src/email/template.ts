@@ -1,5 +1,5 @@
 import type { IntelItem, SignalType } from '../types/index.js';
-import { ANCHOR_COMPANY } from '../config/competitors.js';
+import { ANCHOR_COMPANY, competitorMap } from '../config/competitors.js';
 
 const SIGNAL_LABELS: Record<SignalType, { emoji: string; label: string; color: string }> = {
   financial:  { emoji: '💰', label: 'Financial',   color: '#0066CC' },
@@ -65,7 +65,10 @@ export function buildEmailHtml(items: IntelItem[], date: string): string {
     .join('');
 
   const sections = [...byCompetitor.entries()]
-    .map(([id, cItems]) => competitorSection(id.charAt(0).toUpperCase() + id.slice(1), cItems))
+    .map(([id, cItems]) => {
+      const name = competitorMap.get(id)?.displayName ?? (id.charAt(0).toUpperCase() + id.slice(1));
+      return competitorSection(name, cItems);
+    })
     .join('');
 
   return `<!DOCTYPE html>
@@ -126,7 +129,8 @@ export function buildEmailText(items: IntelItem[], date: string): string {
   }
 
   for (const [id, cItems] of byCompetitor) {
-    lines.push(`## ${id.toUpperCase()} (${cItems.length} items)`);
+    const name = competitorMap.get(id)?.displayName ?? id.toUpperCase();
+    lines.push(`## ${name.toUpperCase()} (${cItems.length} items)`);
     for (const i of cItems) {
       lines.push(`[${i.signal}] ${i.date.slice(0, 10)} — ${i.title}`);
       if (i.snippet) lines.push(`  ${i.snippet.slice(0, 150)}`);
