@@ -1,6 +1,10 @@
 import type { IntelItem, SignalType } from '../types/index.js';
 import { ANCHOR_COMPANY, competitorMap } from '../config/competitors.js';
 
+// Competitor IDs rendered in a separate section at the bottom of the email.
+// Keeps crypto/stablecoin signals visually distinct from core competitive intel.
+const CRYPTO_SECTION_IDS = new Set(['stablecoin-payments']);
+
 const SIGNAL_LABELS: Record<SignalType, { emoji: string; label: string; color: string }> = {
   financial:  { emoji: '💰', label: 'Financial',   color: '#0066CC' },
   product:    { emoji: '🚀', label: 'Product',      color: '#00875A' },
@@ -64,12 +68,31 @@ export function buildEmailHtml(items: IntelItem[], date: string): string {
     })
     .join('');
 
-  const sections = [...byCompetitor.entries()]
-    .map(([id, cItems]) => {
-      const name = competitorMap.get(id)?.displayName ?? (id.charAt(0).toUpperCase() + id.slice(1));
-      return competitorSection(name, cItems);
-    })
-    .join('');
+  const allEntries = [...byCompetitor.entries()];
+  const mainEntries   = allEntries.filter(([id]) => !CRYPTO_SECTION_IDS.has(id));
+  const cryptoEntries = allEntries.filter(([id]) =>  CRYPTO_SECTION_IDS.has(id));
+
+  const toSection = ([id, cItems]: [string, IntelItem[]]) => {
+    const name = competitorMap.get(id)?.displayName ?? (id.charAt(0).toUpperCase() + id.slice(1));
+    return competitorSection(name, cItems);
+  };
+
+  const mainSections   = mainEntries.map(toSection).join('');
+  const cryptoSections = cryptoEntries.map(toSection).join('');
+
+  const cryptoDivider = cryptoEntries.length > 0 ? `
+    <tr><td style="padding:28px 32px 0;">
+      <div style="border-top:2px solid #DFE1E6;padding-top:20px;">
+        <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#6B778C;font-weight:600;">
+          Digital Currency &amp; Stablecoin Payments
+        </div>
+        <div style="font-size:12px;color:#97A0AF;margin-top:3px;">
+          Filtered to stablecoins, tokenized deposits, regulation, and payments infrastructure
+        </div>
+      </div>
+    </td></tr>` : '';
+
+  const sections = mainSections + cryptoDivider + cryptoSections;
 
   return `<!DOCTYPE html>
 <html>
@@ -128,7 +151,22 @@ export function buildEmailText(items: IntelItem[], date: string): string {
     byCompetitor.set(item.competitorId, list);
   }
 
-  for (const [id, cItems] of byCompetitor) {
+  const allPlainEntries = [...byCompetitor.entries()];
+  const mainPlainEntries   = allPlainEntries.filter(([id]) => !CRYPTO_SECTION_IDS.has(id));
+  const cryptoPlainEntries = allPlainEntries.filter(([id]) =>  CRYPTO_SECTION_IDS.has(id));
+  const orderedEntries = [...mainPlainEntries, ...cryptoPlainEntries];
+
+  let cryptoDividerInserted = false;
+  for (const [id, cItems] of orderedEntries) {
+    if (!cryptoDividerInserted && CRYPTO_SECTION_IDS.has(id)) {
+      lines.push('');
+      lines.push('═'.repeat(60));
+      lines.push('DIGITAL CURRENCY & STABLECOIN PAYMENTS');
+      lines.push('Filtered to stablecoins, tokenized deposits, regulation, and payments infrastructure');
+      lines.push('═'.repeat(60));
+      lines.push('');
+      cryptoDividerInserted = true;
+    }
     const name = competitorMap.get(id)?.displayName ?? id.toUpperCase();
     lines.push(`## ${name.toUpperCase()} (${cItems.length} items)`);
     for (const i of cItems) {

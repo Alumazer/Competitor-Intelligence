@@ -148,11 +148,11 @@ export const competitors: CompetitorConfig[] = [
   {
     id: 'stablecoin-payments',
     displayName: 'Stablecoin & Digital Currency Payments',
-    // Contify consistently surfaced stablecoin signals: Western Union Stable Card,
-    // Banking Circle stablecoin settlement, Circle/USDC APAC expansion, MoonPay
-    // virtual accounts, USDb and EURAU launches. This tracker covers the intersection
-    // of stablecoins/CBDC with real payments infrastructure and cross-border use cases.
-    newsQuery: '(stablecoin OR "digital currency" OR CBDC OR USDC OR USDT OR "digital dollar") AND (payments OR "cross-border" OR remittance OR settlement OR "money transfer" OR fintech) AND (launch OR product OR regulation OR adoption OR partnership OR infrastructure)',
+    // Covers the intersection of stablecoins/CBDC with real payments infrastructure.
+    // Deliberately narrow: must touch payments, cross-border, settlement, regulation,
+    // or tokenized deposits. Excludes pure trading, price, market cap, and speculation
+    // to avoid crypto noise overwhelming the briefing.
+    newsQuery: '(stablecoin OR "tokenized deposit" OR "tokenised deposit" OR CBDC OR "digital dollar" OR USDC OR USDT OR "programmable money") AND (payments OR "cross-border" OR remittance OR settlement OR "money transfer" OR regulation OR compliance OR "payment infrastructure" OR "financial institution" OR bank) NOT (trading OR "price prediction" OR "market cap" OR "bull run" OR "bear market" OR NFT OR "crypto exchange" OR speculation OR "investment returns")',
     blogRssUrl: 'https://www.theblock.co/rss.xml',                         // The Block: leading crypto/stablecoin news
     pressRssUrl: 'https://www.coindesk.com/arc/outboundfeeds/rss/',        // CoinDesk: stablecoin and digital currency coverage
   },
